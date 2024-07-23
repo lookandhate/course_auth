@@ -1,0 +1,43 @@
+services:
+  auth_db:
+    image: postgres:16.3-alpine3.20
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB_NAME}
+    volumes:
+      - auth_db:/var/lib/postgresql/data
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    networks:
+      - auth_db_network
+
+  migrator:
+    build:
+      context: .
+      dockerfile: migration.Dockerfile
+    restart: on-failure
+    environment:
+      DB_HOST: auth_db
+    networks:
+      - auth_db_network
+    depends_on:
+      - auth_db
+
+  grpc_app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    networks:
+      auth_db_network:
+    ports:
+      - "50051:50051"
+
+volumes:
+  auth_db:
+networks:
+  auth_db_network:
+    driver: bridge
