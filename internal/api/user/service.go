@@ -2,16 +2,16 @@ package user
 
 import (
 	"github.com/lookandhate/course_auth/internal/service"
-	"github.com/lookandhate/course_auth/pkg/auth_v1"
+	authAPI "github.com/lookandhate/course_auth/pkg/auth_v1"
 )
 
-// grpc server Implementation.
-type Implementation struct {
-	auth_v1.UnimplementedAuthServer
-	service service.UserService
+type Server struct {
+	authAPI.UnimplementedAuthServer
+	userService service.UserService
 }
 
-// NewImplementation creates grpc server Implementation.
-func NewImplementation(service service.UserService) *Implementation {
-	return &Implementation{service: service}
+func NewAuthServer(service service.UserService) *Server {
+	return &Server{
+		userService: service,
+	}
 }

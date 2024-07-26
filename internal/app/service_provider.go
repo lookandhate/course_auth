@@ -22,7 +22,7 @@ type serviceProvider struct {
 	userRepository repository.UserRepository
 
 	userService    service.UserService
-	userServerImpl *userServer.Implementation
+	userServerImpl *userServer.Server
 }
 
 // newServiceProvider creates plain serviceProvider.
@@ -80,9 +80,9 @@ func (s *serviceProvider) PgPool(ctx context.Context) *pgxpool.Pool {
 	return s.pgPool
 }
 
-func (s *serviceProvider) UserServerImpl(ctx context.Context) *userServer.Implementation {
+func (s *serviceProvider) UserServerImpl(ctx context.Context) *userServer.Server {
 	if s.userServerImpl == nil {
-		s.userServerImpl = userServer.NewImplementation(s.UserService(ctx))
+		s.userServerImpl = userServer.NewAuthServer(s.UserService(ctx))
 	}
 	return s.userServerImpl
 }
