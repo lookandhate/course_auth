@@ -3,9 +3,9 @@ package auth
 import (
 	"context"
 
-	"github.com/lookandhate/microservice-courese/auth/internal/convertor"
-	"github.com/lookandhate/microservice-courese/auth/internal/service"
-	authAPI "github.com/lookandhate/microservice-courese/auth/pkg/auth_v1"
+	"github.com/lookandhate/course_auth/internal/convertor"
+	"github.com/lookandhate/course_auth/internal/service"
+	authAPI "github.com/lookandhate/course_auth/pkg/auth_v1"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 

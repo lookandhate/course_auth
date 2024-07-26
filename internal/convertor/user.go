@@ -1,9 +1,9 @@
 package convertor
 
 import (
-	repository "github.com/lookandhate/microservice-courese/auth/internal/repository/model"
-	"github.com/lookandhate/microservice-courese/auth/internal/service/model"
-	"github.com/lookandhate/microservice-courese/auth/pkg/auth_v1"
+	repository "github.com/lookandhate/course_auth/internal/repository/model"
+	"github.com/lookandhate/course_auth/internal/service/model"
+	"github.com/lookandhate/course_auth/pkg/auth_v1"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 

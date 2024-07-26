@@ -1,4 +1,4 @@
-module github.com/lookandhate/microservice-courese/auth
+module github.com/lookandhate/course_auth
 
 go 1.22
 

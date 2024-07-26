@@ -9,8 +9,8 @@ import (
 
 	"github.com/Masterminds/squirrel"
 	"github.com/jackc/pgx/v5/pgxpool"
-	repository "github.com/lookandhate/microservice-courese/auth/internal/repository/model"
-	"github.com/lookandhate/microservice-courese/auth/internal/service/model"
+	repository "github.com/lookandhate/course_auth/internal/repository/model"
+	"github.com/lookandhate/course_auth/internal/service/model"
 )
 
 type PostgresRepository struct {
@@ -97,7 +97,11 @@ func (r *PostgresRepository) UpdateUser(ctx context.Context, user *model.UpdateU
 
 	builder = builder.
 		Set(updatedAtColumn, time.Now()).
-		Suffix(fmt.Sprintf("RETURNING %s, %s, %s, %s, %s, %s", idColumn, emailColumn, nameColumn, roleColumn, createdAtColumn, updatedAtColumn))
+		Suffix(
+			fmt.Sprintf(
+				"RETURNING %s, %s, %s, %s, %s, %s",
+				idColumn, emailColumn, nameColumn, roleColumn, createdAtColumn, updatedAtColumn),
+		)
 
 	sql, args, err := builder.ToSql()
 	if err != nil {
@@ -133,7 +137,9 @@ func (r *PostgresRepository) DeleteUser(ctx context.Context, id int) error {
 func (r *PostgresRepository) CheckUserExists(ctx context.Context, id int) (bool, error) {
 	var exists bool
 
-	builder := squirrel.Select(fmt.Sprintf("EXISTS(SELECT 1 FROM %s WHERE id = %s) AS user_exists", userTable, strconv.Itoa(id)))
+	builder := squirrel.Select(
+		fmt.Sprintf("EXISTS(SELECT 1 FROM %s WHERE id = %s) AS user_exists", userTable, strconv.Itoa(id)),
+	)
 	sql, args, err := builder.ToSql()
 
 	if err != nil {

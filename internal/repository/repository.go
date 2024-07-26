@@ -3,8 +3,8 @@ package repository
 import (
 	"context"
 
-	repository "github.com/lookandhate/microservice-courese/auth/internal/repository/model"
-	"github.com/lookandhate/microservice-courese/auth/internal/service/model"
+	repository "github.com/lookandhate/course_auth/internal/repository/model"
+	"github.com/lookandhate/course_auth/internal/service/model"
 )
 
 type UserRepository interface {

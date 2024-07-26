@@ -1,6 +1,6 @@
 package service
 
-import "github.com/lookandhate/microservice-courese/auth/internal/repository"
+import "github.com/lookandhate/course_auth/internal/repository"
 
 type Service struct {
 	repo repository.UserRepository

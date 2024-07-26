@@ -3,9 +3,9 @@ package service
 import (
 	"context"
 
-	"github.com/lookandhate/microservice-courese/auth/internal/convertor"
-	"github.com/lookandhate/microservice-courese/auth/internal/service"
-	"github.com/lookandhate/microservice-courese/auth/internal/service/model"
+	"github.com/lookandhate/course_auth/internal/convertor"
+	"github.com/lookandhate/course_auth/internal/service"
+	"github.com/lookandhate/course_auth/internal/service/model"
 )
 
 // RegisterUser validates CreateUserModel, then passes it to repo layer and returns created user id.
