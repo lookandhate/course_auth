@@ -124,7 +124,7 @@ func (r *PostgresRepository) UpdateUser(ctx context.Context, user *model.UpdateU
 }
 
 func (r *PostgresRepository) DeleteUser(ctx context.Context, id int) error {
-	builder := squirrel.Delete(userTable).Where(squirrel.Eq{idColumn: id})
+	builder := squirrel.Delete(userTable).PlaceholderFormat(squirrel.Dollar).Where(squirrel.Eq{idColumn: id})
 	sql, args, err := builder.ToSql()
 
 	if err != nil {
@@ -151,6 +151,6 @@ func (r *PostgresRepository) CheckUserExists(ctx context.Context, id int) (bool,
 	if err != nil {
 		return false, err
 	}
-	err = r.db.DB().QueryRowContext(ctx, query, args...).Scan(&exists)
+	err = r.db.DB().ScanOneContext(ctx, &exists, query, args...)
 	return exists, err
 }

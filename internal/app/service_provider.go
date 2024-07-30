@@ -4,7 +4,6 @@ import (
 	"context"
 	"log"
 
-	"github.com/jackc/pgx/v5/pgxpool"
 	userServer "github.com/lookandhate/course_auth/internal/api/user"
 	"github.com/lookandhate/course_auth/internal/client/db"
 	"github.com/lookandhate/course_auth/internal/client/db/pg"
@@ -20,7 +19,6 @@ import (
 // serviceProvider is a DI container.
 type serviceProvider struct {
 	appCfg *config.AppConfig
-	pgPool *pgxpool.Pool
 
 	dbClient           db.Client
 	transactionManager db.TxManager
@@ -57,33 +55,10 @@ func (s *serviceProvider) UserRepository(ctx context.Context) repository.UserRep
 // UserService creates and returns service.UserService.
 func (s *serviceProvider) UserService(ctx context.Context) service.UserService {
 	if s.userService == nil {
-		s.userService = userService.NewUserService(s.UserRepository(ctx))
+		s.userService = userService.NewUserService(s.UserRepository(ctx), s.TxManager(ctx))
 	}
 
 	return s.userService
-}
-
-// PgPool returns and creates(if not exists) pgxpool.Pool.
-func (s *serviceProvider) PgPool(ctx context.Context) *pgxpool.Pool {
-	if s.pgPool == nil {
-		pool, err := pgxpool.New(ctx, s.AppCfg().DB.GetDSN())
-		if err != nil {
-			log.Fatal(err)
-		}
-		closer.Add(func() error {
-			pool.Close()
-			return nil
-		})
-
-		s.pgPool = pool
-	}
-
-	err := s.pgPool.Ping(ctx)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	return s.pgPool
 }
 
 func (s *serviceProvider) UserServerImpl(ctx context.Context) *userServer.Server {

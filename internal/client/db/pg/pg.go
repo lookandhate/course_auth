@@ -15,7 +15,7 @@ import (
 type key string
 
 const (
-	TxKey key = "tx"
+	TxKey string = "tx"
 )
 
 type pg struct {

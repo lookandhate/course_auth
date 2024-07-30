@@ -53,14 +53,11 @@ func (m *manager) transaction(ctx context.Context, opts pgx.TxOptions, fn db.Han
 
 			return
 		}
-
-		// если ошибок не было, коммитим транзакцию
-		if nil == err {
-			err = tx.Commit(ctx)
-			if err != nil {
-				err = errors.Wrap(err, "tx commit failed")
-			}
+		err = tx.Commit(ctx)
+		if err != nil {
+			err = errors.Wrap(err, "tx commit failed")
 		}
+
 	}()
 
 	// Выполните код внутри транзакции.
