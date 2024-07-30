@@ -3,18 +3,18 @@ package user
 import (
 	"context"
 	"fmt"
-	"log"
 	"strconv"
 	"time"
 
 	"github.com/Masterminds/squirrel"
-	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/lookandhate/course_auth/internal/client/db"
+	"github.com/lookandhate/course_auth/internal/repository/convertor"
 	repository "github.com/lookandhate/course_auth/internal/repository/model"
 	"github.com/lookandhate/course_auth/internal/service/model"
 )
 
 type PostgresRepository struct {
-	pgx *pgxpool.Pool
+	db db.Client
 }
 
 const (
@@ -32,8 +32,8 @@ const (
 )
 
 // NewPostgresRepository creates PostgresRepository instance.
-func NewPostgresRepository(connectionPool *pgxpool.Pool) *PostgresRepository {
-	return &PostgresRepository{pgx: connectionPool}
+func NewPostgresRepository(db db.Client) *PostgresRepository {
+	return &PostgresRepository{db: db}
 }
 
 func (r *PostgresRepository) CreateUser(ctx context.Context, user *repository.CreateUserModel) (int, error) {
@@ -47,9 +47,13 @@ func (r *PostgresRepository) CreateUser(ctx context.Context, user *repository.Cr
 	if err != nil {
 		return 0, err
 	}
+	query := db.Query{
+		Name:     "repository.CreateUser",
+		QueryRaw: sql,
+	}
 
 	var id int
-	err = r.pgx.QueryRow(ctx, sql, args...).Scan(&id)
+	err = r.db.DB().QueryRowContext(ctx, query, args...).Scan(&id)
 	if err != nil {
 		return 0, err
 	}
@@ -69,14 +73,14 @@ func (r *PostgresRepository) GetUser(ctx context.Context, id int) (*model.UserMo
 		return nil, err
 	}
 
-	var user model.UserModel
-
-	err = r.pgx.QueryRow(ctx, sql, args...).Scan(&user.ID, &user.Email, &user.Password, &user.Name, &user.Role)
+	q := db.Query{Name: "repository.GetUser", QueryRaw: sql}
+	var user repository.UserModel
+	err = r.db.DB().ScanOneContext(ctx, &user, q, args...)
 	if err != nil {
 		return nil, err
 	}
 
-	return &user, nil
+	return convertor.UserRepoToService(&user), nil
 }
 
 func (r *PostgresRepository) UpdateUser(ctx context.Context, user *model.UpdateUserModel) (*model.UserModel, error) {
@@ -108,29 +112,27 @@ func (r *PostgresRepository) UpdateUser(ctx context.Context, user *model.UpdateU
 		return nil, err
 	}
 
-	updatedUser := &model.UserModel{}
-	err = r.pgx.QueryRow(ctx, sql, args...).Scan(
-		&updatedUser.ID,
-		&updatedUser.Email,
-		&updatedUser.Name,
-		&updatedUser.Role,
-		&updatedUser.CreatedAt,
-		&updatedUser.UpdatedAt)
+	query := db.Query{Name: "repository.UpdateUser", QueryRaw: sql}
+
+	updatedUser := repository.UserModel{}
+	err = r.db.DB().ScanOneContext(ctx, &updatedUser, query, args...)
 	if err != nil {
 		return nil, err
 	}
 
-	return updatedUser, nil
+	return convertor.UserRepoToService(&updatedUser), nil
 }
 
 func (r *PostgresRepository) DeleteUser(ctx context.Context, id int) error {
 	builder := squirrel.Delete(userTable).Where(squirrel.Eq{idColumn: id})
 	sql, args, err := builder.ToSql()
+
 	if err != nil {
 		return err
 	}
-	log.Println(sql, args)
-	_, err = r.pgx.Exec(ctx, sql, args...)
+	query := db.Query{Name: "repository.DeleteUser", QueryRaw: sql}
+	_, err = r.db.DB().ExecContext(ctx, query, args...)
+
 	return err
 }
 
@@ -141,10 +143,14 @@ func (r *PostgresRepository) CheckUserExists(ctx context.Context, id int) (bool,
 		fmt.Sprintf("EXISTS(SELECT 1 FROM %s WHERE id = %s) AS user_exists", userTable, strconv.Itoa(id)),
 	)
 	sql, args, err := builder.ToSql()
+	query := db.Query{
+		Name:     "repository.CheckUserExists",
+		QueryRaw: sql,
+	}
 
 	if err != nil {
 		return false, err
 	}
-	err = r.pgx.QueryRow(ctx, sql, args...).Scan(&exists)
+	err = r.db.DB().QueryRowContext(ctx, query, args...).Scan(&exists)
 	return exists, err
 }

@@ -6,6 +6,9 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	userServer "github.com/lookandhate/course_auth/internal/api/user"
+	"github.com/lookandhate/course_auth/internal/client/db"
+	"github.com/lookandhate/course_auth/internal/client/db/pg"
+	"github.com/lookandhate/course_auth/internal/client/transaction"
 	"github.com/lookandhate/course_auth/internal/closer"
 	"github.com/lookandhate/course_auth/internal/config"
 	"github.com/lookandhate/course_auth/internal/repository"
@@ -18,6 +21,9 @@ import (
 type serviceProvider struct {
 	appCfg *config.AppConfig
 	pgPool *pgxpool.Pool
+
+	dbClient           db.Client
+	transactionManager db.TxManager
 
 	userRepository repository.UserRepository
 
@@ -42,7 +48,7 @@ func (s *serviceProvider) AppCfg() *config.AppConfig {
 // UserRepository creates(if not exist) and returns repository.UserRepository instance.
 func (s *serviceProvider) UserRepository(ctx context.Context) repository.UserRepository {
 	if s.userRepository == nil {
-		s.userRepository = userRepo.NewPostgresRepository(s.PgPool(ctx))
+		s.userRepository = userRepo.NewPostgresRepository(s.DBClient(ctx))
 	}
 
 	return s.userRepository
@@ -85,4 +91,31 @@ func (s *serviceProvider) UserServerImpl(ctx context.Context) *userServer.Server
 		s.userServerImpl = userServer.NewAuthServer(s.UserService(ctx))
 	}
 	return s.userServerImpl
+}
+
+func (s *serviceProvider) DBClient(ctx context.Context) db.Client {
+	if s.dbClient == nil {
+		cl, err := pg.New(ctx, s.AppCfg().DB.GetDSN())
+		if err != nil {
+			log.Fatalf("failed to create db client: %v", err)
+		}
+
+		err = cl.DB().Ping(ctx)
+		if err != nil {
+			log.Fatalf("ping error: %s", err.Error())
+		}
+		closer.Add(cl.Close)
+
+		s.dbClient = cl
+	}
+
+	return s.dbClient
+}
+
+func (s *serviceProvider) TxManager(ctx context.Context) db.TxManager {
+	if s.transactionManager == nil {
+		s.transactionManager = transaction.NewTransactionManager(s.DBClient(ctx).DB())
+	}
+
+	return s.transactionManager
 }
