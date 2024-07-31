@@ -14,5 +14,4 @@ func UserRepoToService(user *repository.UserModel) *model.UserModel {
 		CreatedAt: user.CreatedAt,
 		UpdatedAt: user.UpdatedAt,
 	}
-
 }

@@ -9,7 +9,7 @@ import (
 )
 
 // Register validates CreateUserModel, then passes it to repo layer and returns created user id.
-func (s *Service) Register(ctx context.Context, user *model.CreateUserModel) (createdUserID int, err error) {
+func (s *Service) Register(ctx context.Context, user *model.CreateUserModel) (int, error) {
 	if user == nil {
 		return 0, service.ErrEmptyUser
 	}
@@ -22,7 +22,9 @@ func (s *Service) Register(ctx context.Context, user *model.CreateUserModel) (cr
 		return 0, service.ErrPasswordMismatch
 	}
 
-	err = s.txManager.ReadCommitted(ctx, func(ctx context.Context) error {
+	var createdUserID int
+	err := s.txManager.ReadCommitted(ctx, func(ctx context.Context) error {
+		var err error
 		createdUserID, err = s.repo.CreateUser(ctx, convertor.CreateUserModelToRepo(user))
 		return err
 	})
@@ -31,5 +33,5 @@ func (s *Service) Register(ctx context.Context, user *model.CreateUserModel) (cr
 		return 0, err
 	}
 
-	return
+	return createdUserID, nil
 }
