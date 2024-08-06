@@ -15,6 +15,7 @@ tasks:
     - GOBIN={{.LOCAL_BIN}} go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.28
     - GOBIN={{.LOCAL_BIN}} go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.2
     - GOBIN={{.LOCAL_BIN}} go install github.com/pressly/goose/v3/cmd/goose@latest
+    - GOBIN={{.LOCAL_BIN}} go install github.com/gojuno/minimock/v3/cmd/minimock@latest
 
   generate:
     - protoc --proto_path api/auth_v1 --go_out=./pkg/auth_v1/
