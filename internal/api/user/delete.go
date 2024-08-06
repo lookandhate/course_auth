@@ -9,6 +9,9 @@ import (
 
 func (s *Server) Delete(ctx context.Context, request *authAPI.DeleteRequest) (*emptypb.Empty, error) {
 	err := s.userService.Delete(ctx, int(request.GetId()))
+	if err != nil {
+		return nil, err
+	}
 
-	return &emptypb.Empty{}, err
+	return &emptypb.Empty{}, nil
 }

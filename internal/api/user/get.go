@@ -9,7 +9,6 @@ import (
 
 func (s *Server) Get(ctx context.Context, request *authAPI.GetRequest) (*authAPI.GetResponse, error) {
 	user, err := s.userService.Get(ctx, int(request.GetId()))
-
 	if err != nil {
 		return nil, err
 	}

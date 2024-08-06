@@ -47,12 +47,14 @@ func (r *PostgresRepository) CreateUser(ctx context.Context, user *repository.Cr
 	if err != nil {
 		return 0, err
 	}
+
 	query := db.Query{
 		Name:     "repository.CreateUser",
 		QueryRaw: sql,
 	}
 
 	var id int
+
 	err = r.db.DB().QueryRowContext(ctx, query, args...).Scan(&id)
 	if err != nil {
 		return 0, err
@@ -74,7 +76,9 @@ func (r *PostgresRepository) GetUser(ctx context.Context, id int) (*model.UserMo
 	}
 
 	q := db.Query{Name: "repository.GetUser", QueryRaw: sql}
+
 	var user repository.UserModel
+
 	err = r.db.DB().ScanOneContext(ctx, &user, q, args...)
 	if err != nil {
 		return nil, err
@@ -115,6 +119,7 @@ func (r *PostgresRepository) UpdateUser(ctx context.Context, user *model.UpdateU
 	query := db.Query{Name: "repository.UpdateUser", QueryRaw: sql}
 
 	updatedUser := repository.UserModel{}
+
 	err = r.db.DB().ScanOneContext(ctx, &updatedUser, query, args...)
 	if err != nil {
 		return nil, err
@@ -130,7 +135,9 @@ func (r *PostgresRepository) DeleteUser(ctx context.Context, id int) error {
 	if err != nil {
 		return err
 	}
+
 	query := db.Query{Name: "repository.DeleteUser", QueryRaw: sql}
+
 	_, err = r.db.DB().ExecContext(ctx, query, args...)
 
 	return err
@@ -143,14 +150,16 @@ func (r *PostgresRepository) CheckUserExists(ctx context.Context, id int) (bool,
 		fmt.Sprintf("EXISTS(SELECT 1 FROM %s WHERE id = %s) AS user_exists", userTable, strconv.Itoa(id)),
 	)
 	sql, args, err := builder.ToSql()
+	if err != nil {
+		return false, err
+	}
+
 	query := db.Query{
 		Name:     "repository.CheckUserExists",
 		QueryRaw: sql,
 	}
 
-	if err != nil {
-		return false, err
-	}
 	err = r.db.DB().ScanOneContext(ctx, &exists, query, args...)
+
 	return exists, err
 }
