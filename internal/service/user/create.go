@@ -3,12 +3,12 @@ package service
 import (
 	"context"
 
-	"github.com/lookandhate/microservice-courese/auth/internal/convertor"
-	"github.com/lookandhate/microservice-courese/auth/internal/service"
-	"github.com/lookandhate/microservice-courese/auth/internal/service/model"
+	"github.com/lookandhate/course_auth/internal/convertor"
+	"github.com/lookandhate/course_auth/internal/service"
+	"github.com/lookandhate/course_auth/internal/service/model"
 )
 
-// RegisterUser validates CreateUserModel, then passes it to repo layer and returns created user id.
+// Register validates CreateUserModel, then passes it to repo layer and returns created user id.
 func (s *Service) Register(ctx context.Context, user *model.CreateUserModel) (int, error) {
 	if user == nil {
 		return 0, service.ErrEmptyUser
@@ -22,10 +22,16 @@ func (s *Service) Register(ctx context.Context, user *model.CreateUserModel) (in
 		return 0, service.ErrPasswordMismatch
 	}
 
-	createUserID, err := s.repo.CreateUser(ctx, convertor.CreateUserModelToRepo(user))
+	var createdUserID int
+	err := s.txManager.ReadCommitted(ctx, func(ctx context.Context) error {
+		var err error
+		createdUserID, err = s.repo.CreateUser(ctx, convertor.CreateUserModelToRepo(user))
+		return err
+	})
+
 	if err != nil {
 		return 0, err
 	}
 
-	return createUserID, nil
+	return createdUserID, nil
 }

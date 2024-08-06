@@ -1,0 +1,9 @@
+env: local
+grpc:
+  port: 50051
+db:
+  host: "localhost"
+  port: 54320
+  db_name: "auth"
+  password: "POSTGRES_PASSWORD"
+  user: "POSTGRES_USER"

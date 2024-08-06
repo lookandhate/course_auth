@@ -3,7 +3,7 @@ package service
 import (
 	"context"
 
-	"github.com/lookandhate/microservice-courese/auth/internal/service"
+	"github.com/lookandhate/course_auth/internal/service"
 )
 
 // validateID check passed ID and returns error if it is not correct.
