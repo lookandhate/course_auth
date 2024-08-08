@@ -4,11 +4,13 @@ go 1.22
 
 require (
 	github.com/Masterminds/squirrel v1.5.4
+	github.com/brianvoe/gofakeit v3.18.0+incompatible
 	github.com/georgysavva/scany/v2 v2.1.3
 	github.com/gojuno/minimock/v3 v3.3.13
 	github.com/ilyakaznacheev/cleanenv v1.5.0
 	github.com/jackc/pgx/v5 v5.6.0
 	github.com/pkg/errors v0.9.1
+	github.com/stretchr/testify v1.8.4
 	google.golang.org/grpc v1.65.0
 	google.golang.org/protobuf v1.34.2
 )
