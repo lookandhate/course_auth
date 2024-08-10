@@ -349,3 +349,6 @@ issues:
         - gosec
         - noctx
         - wrapcheck
+    - path: "_minimock.go"
+      linters:
+        - typecheck

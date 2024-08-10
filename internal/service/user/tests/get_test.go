@@ -7,13 +7,13 @@ import (
 
 	"github.com/brianvoe/gofakeit"
 	"github.com/gojuno/minimock/v3"
-	"github.com/lookandhate/course_auth/internal/client/db"
-	"github.com/lookandhate/course_auth/internal/client/db/mocks"
 	"github.com/lookandhate/course_auth/internal/repository"
 	repoMocks "github.com/lookandhate/course_auth/internal/repository/mocks"
 	"github.com/lookandhate/course_auth/internal/service"
 	"github.com/lookandhate/course_auth/internal/service/model"
 	userService "github.com/lookandhate/course_auth/internal/service/user"
+	"github.com/lookandhate/course_platform_lib/pkg/db"
+	"github.com/lookandhate/course_platform_lib/pkg/db/mocks"
 	"github.com/stretchr/testify/require"
 )
 

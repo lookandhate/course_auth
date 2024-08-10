@@ -12,7 +12,7 @@ import (
 	mm_time "time"
 
 	"github.com/gojuno/minimock/v3"
-	repository "github.com/lookandhate/course_auth/internal/repository/model"
+	repoModel "github.com/lookandhate/course_auth/internal/repository/model"
 	"github.com/lookandhate/course_auth/internal/service/model"
 )
 
@@ -27,8 +27,8 @@ type UserRepositoryMock struct {
 	beforeCheckUserExistsCounter uint64
 	CheckUserExistsMock          mUserRepositoryMockCheckUserExists
 
-	funcCreateUser          func(ctx context.Context, user *repository.CreateUserModel) (i1 int, err error)
-	inspectFuncCreateUser   func(ctx context.Context, user *repository.CreateUserModel)
+	funcCreateUser          func(ctx context.Context, user *repoModel.CreateUserModel) (i1 int, err error)
+	inspectFuncCreateUser   func(ctx context.Context, user *repoModel.CreateUserModel)
 	afterCreateUserCounter  uint64
 	beforeCreateUserCounter uint64
 	CreateUserMock          mUserRepositoryMockCreateUser
@@ -425,13 +425,13 @@ type UserRepositoryMockCreateUserExpectation struct {
 // UserRepositoryMockCreateUserParams contains parameters of the UserRepository.CreateUser
 type UserRepositoryMockCreateUserParams struct {
 	ctx  context.Context
-	user *repository.CreateUserModel
+	user *repoModel.CreateUserModel
 }
 
 // UserRepositoryMockCreateUserParamPtrs contains pointers to parameters of the UserRepository.CreateUser
 type UserRepositoryMockCreateUserParamPtrs struct {
 	ctx  *context.Context
-	user **repository.CreateUserModel
+	user **repoModel.CreateUserModel
 }
 
 // UserRepositoryMockCreateUserResults contains results of the UserRepository.CreateUser
@@ -451,7 +451,7 @@ func (mmCreateUser *mUserRepositoryMockCreateUser) Optional() *mUserRepositoryMo
 }
 
 // Expect sets up expected params for UserRepository.CreateUser
-func (mmCreateUser *mUserRepositoryMockCreateUser) Expect(ctx context.Context, user *repository.CreateUserModel) *mUserRepositoryMockCreateUser {
+func (mmCreateUser *mUserRepositoryMockCreateUser) Expect(ctx context.Context, user *repoModel.CreateUserModel) *mUserRepositoryMockCreateUser {
 	if mmCreateUser.mock.funcCreateUser != nil {
 		mmCreateUser.mock.t.Fatalf("UserRepositoryMock.CreateUser mock is already set by Set")
 	}
@@ -497,7 +497,7 @@ func (mmCreateUser *mUserRepositoryMockCreateUser) ExpectCtxParam1(ctx context.C
 }
 
 // ExpectUserParam2 sets up expected param user for UserRepository.CreateUser
-func (mmCreateUser *mUserRepositoryMockCreateUser) ExpectUserParam2(user *repository.CreateUserModel) *mUserRepositoryMockCreateUser {
+func (mmCreateUser *mUserRepositoryMockCreateUser) ExpectUserParam2(user *repoModel.CreateUserModel) *mUserRepositoryMockCreateUser {
 	if mmCreateUser.mock.funcCreateUser != nil {
 		mmCreateUser.mock.t.Fatalf("UserRepositoryMock.CreateUser mock is already set by Set")
 	}
@@ -519,7 +519,7 @@ func (mmCreateUser *mUserRepositoryMockCreateUser) ExpectUserParam2(user *reposi
 }
 
 // Inspect accepts an inspector function that has same arguments as the UserRepository.CreateUser
-func (mmCreateUser *mUserRepositoryMockCreateUser) Inspect(f func(ctx context.Context, user *repository.CreateUserModel)) *mUserRepositoryMockCreateUser {
+func (mmCreateUser *mUserRepositoryMockCreateUser) Inspect(f func(ctx context.Context, user *repoModel.CreateUserModel)) *mUserRepositoryMockCreateUser {
 	if mmCreateUser.mock.inspectFuncCreateUser != nil {
 		mmCreateUser.mock.t.Fatalf("Inspect function is already set for UserRepositoryMock.CreateUser")
 	}
@@ -543,7 +543,7 @@ func (mmCreateUser *mUserRepositoryMockCreateUser) Return(i1 int, err error) *Us
 }
 
 // Set uses given function f to mock the UserRepository.CreateUser method
-func (mmCreateUser *mUserRepositoryMockCreateUser) Set(f func(ctx context.Context, user *repository.CreateUserModel) (i1 int, err error)) *UserRepositoryMock {
+func (mmCreateUser *mUserRepositoryMockCreateUser) Set(f func(ctx context.Context, user *repoModel.CreateUserModel) (i1 int, err error)) *UserRepositoryMock {
 	if mmCreateUser.defaultExpectation != nil {
 		mmCreateUser.mock.t.Fatalf("Default expectation is already set for the UserRepository.CreateUser method")
 	}
@@ -558,7 +558,7 @@ func (mmCreateUser *mUserRepositoryMockCreateUser) Set(f func(ctx context.Contex
 
 // When sets expectation for the UserRepository.CreateUser which will trigger the result defined by the following
 // Then helper
-func (mmCreateUser *mUserRepositoryMockCreateUser) When(ctx context.Context, user *repository.CreateUserModel) *UserRepositoryMockCreateUserExpectation {
+func (mmCreateUser *mUserRepositoryMockCreateUser) When(ctx context.Context, user *repoModel.CreateUserModel) *UserRepositoryMockCreateUserExpectation {
 	if mmCreateUser.mock.funcCreateUser != nil {
 		mmCreateUser.mock.t.Fatalf("UserRepositoryMock.CreateUser mock is already set by Set")
 	}
@@ -598,7 +598,7 @@ func (mmCreateUser *mUserRepositoryMockCreateUser) invocationsDone() bool {
 }
 
 // CreateUser implements repository.UserRepository
-func (mmCreateUser *UserRepositoryMock) CreateUser(ctx context.Context, user *repository.CreateUserModel) (i1 int, err error) {
+func (mmCreateUser *UserRepositoryMock) CreateUser(ctx context.Context, user *repoModel.CreateUserModel) (i1 int, err error) {
 	mm_atomic.AddUint64(&mmCreateUser.beforeCreateUserCounter, 1)
 	defer mm_atomic.AddUint64(&mmCreateUser.afterCreateUserCounter, 1)
 

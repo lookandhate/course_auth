@@ -1,7 +1,9 @@
 package service
 
 import (
-	"github.com/lookandhate/course_auth/internal/client/db"
+	//"github.com/lookandhate/course_auth/internal/client/db"
+	"github.com/lookandhate/course_platform_lib/pkg/db"
+
 	"github.com/lookandhate/course_auth/internal/repository"
 )
 

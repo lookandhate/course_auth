@@ -5,15 +5,15 @@ import (
 	"log"
 
 	userServer "github.com/lookandhate/course_auth/internal/api/user"
-	"github.com/lookandhate/course_auth/internal/client/db"
-	"github.com/lookandhate/course_auth/internal/client/db/pg"
-	"github.com/lookandhate/course_auth/internal/client/transaction"
-	"github.com/lookandhate/course_auth/internal/closer"
 	"github.com/lookandhate/course_auth/internal/config"
 	"github.com/lookandhate/course_auth/internal/repository"
 	userRepo "github.com/lookandhate/course_auth/internal/repository/user"
 	"github.com/lookandhate/course_auth/internal/service"
 	userService "github.com/lookandhate/course_auth/internal/service/user"
+	"github.com/lookandhate/course_platform_lib/pkg/closer"
+	"github.com/lookandhate/course_platform_lib/pkg/db"
+	"github.com/lookandhate/course_platform_lib/pkg/db/pg"
+	"github.com/lookandhate/course_platform_lib/pkg/db/transaction"
 )
 
 // serviceProvider is a DI container.

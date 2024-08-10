@@ -7,10 +7,10 @@ import (
 	"time"
 
 	"github.com/Masterminds/squirrel"
-	"github.com/lookandhate/course_auth/internal/client/db"
 	"github.com/lookandhate/course_auth/internal/repository/convertor"
 	repository "github.com/lookandhate/course_auth/internal/repository/model"
 	"github.com/lookandhate/course_auth/internal/service/model"
+	"github.com/lookandhate/course_platform_lib/pkg/db"
 )
 
 type PostgresRepository struct {
