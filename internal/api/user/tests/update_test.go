@@ -17,6 +17,7 @@ import (
 )
 
 func TestUpdate(t *testing.T) {
+	t.Parallel()
 	type userServiceMockFunc func(mc *minimock.Controller) service.UserService
 
 	var (
@@ -57,6 +58,7 @@ func TestUpdate(t *testing.T) {
 			ID:        int(id),
 		}
 	)
+
 	type args struct {
 		ctx context.Context
 		req *userApi.UpdateRequest
@@ -95,6 +97,8 @@ func TestUpdate(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			userServiceMock := tt.userServiceMock(mc)
 			api := user.NewAuthServer(userServiceMock)
 

@@ -20,5 +20,15 @@ func (s *Service) Update(ctx context.Context, user *model.UpdateUserModel) (*mod
 		return nil, err
 	}
 
-	return s.repo.UpdateUser(ctx, user)
+	var updatedUser *model.UserModel
+	err := s.txManager.ReadCommitted(ctx, func(ctx context.Context) error {
+		var err error
+		updatedUser, err = s.repo.UpdateUser(ctx, user)
+		return err
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return updatedUser, nil
 }

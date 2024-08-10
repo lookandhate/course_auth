@@ -7,8 +7,6 @@ package mocks
 import (
 	"sync"
 
-	"github.com/lookandhate/course_auth/internal/repository"
-
 	"context"
 	mm_atomic "sync/atomic"
 	mm_time "time"
