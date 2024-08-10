@@ -149,3 +149,4 @@ go.work
 !/auth/config/example.config.yml
 !/chat/config/example.config.yml
 !/config/example.config.yml
+/coverage.out
