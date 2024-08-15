@@ -6,9 +6,11 @@ require (
 	github.com/Masterminds/squirrel v1.5.4
 	github.com/brianvoe/gofakeit v3.18.0+incompatible
 	github.com/gojuno/minimock/v3 v3.3.14
+	github.com/gomodule/redigo v1.9.2
 	github.com/ilyakaznacheev/cleanenv v1.5.0
-	github.com/lookandhate/course_platform_lib v0.0.0-20240810151122-cdfe0272c84b
+	github.com/lookandhate/course_platform_lib v1.0.4
 	github.com/stretchr/testify v1.8.4
+	golang.org/x/crypto v0.23.0
 	google.golang.org/grpc v1.65.0
 	google.golang.org/protobuf v1.34.2
 )
@@ -26,7 +28,6 @@ require (
 	github.com/lann/ps v0.0.0-20150810152359-62de8c46ede0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	golang.org/x/crypto v0.23.0 // indirect
 	golang.org/x/net v0.25.0 // indirect
 	golang.org/x/sync v0.7.0 // indirect
 	golang.org/x/sys v0.20.0 // indirect

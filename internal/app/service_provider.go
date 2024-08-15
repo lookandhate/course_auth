@@ -3,8 +3,14 @@ package app
 import (
 	"context"
 	"log"
+	"time"
 
+	redigo "github.com/gomodule/redigo/redis"
 	userServer "github.com/lookandhate/course_auth/internal/api/user"
+	"github.com/lookandhate/course_auth/internal/cache"
+	userCache "github.com/lookandhate/course_auth/internal/cache/user"
+	"github.com/lookandhate/course_auth/internal/client"
+	"github.com/lookandhate/course_auth/internal/client/crypto"
 	"github.com/lookandhate/course_auth/internal/config"
 	"github.com/lookandhate/course_auth/internal/repository"
 	userRepo "github.com/lookandhate/course_auth/internal/repository/user"
@@ -23,10 +29,15 @@ type serviceProvider struct {
 	dbClient           db.Client
 	transactionManager db.TxManager
 
+	redisPool *redigo.Pool
+
+	userCache      cache.UserCache
 	userRepository repository.UserRepository
 
 	userService    service.UserService
 	userServerImpl *userServer.Server
+
+	passwordManager client.PasswordManager
 }
 
 // newServiceProvider creates plain serviceProvider.
@@ -55,7 +66,7 @@ func (s *serviceProvider) UserRepository(ctx context.Context) repository.UserRep
 // UserService creates and returns service.UserService.
 func (s *serviceProvider) UserService(ctx context.Context) service.UserService {
 	if s.userService == nil {
-		s.userService = userService.NewUserService(s.UserRepository(ctx), s.TxManager(ctx))
+		s.userService = userService.NewUserService(s.UserRepository(ctx), s.TxManager(ctx), s.UserCache(), s.PasswordManager())
 	}
 
 	return s.userService
@@ -93,4 +104,34 @@ func (s *serviceProvider) TxManager(ctx context.Context) db.TxManager {
 	}
 
 	return s.transactionManager
+}
+
+func (s *serviceProvider) RedisPool() *redigo.Pool {
+	if s.redisPool == nil {
+		s.redisPool = &redigo.Pool{
+			MaxIdle:     s.AppCfg().Redis.MaxIdle,
+			IdleTimeout: time.Duration(s.AppCfg().Redis.IdleTimeout),
+			Dial: func() (redigo.Conn, error) {
+				return redigo.Dial("tcp", s.AppCfg().Redis.Address())
+			},
+		}
+	}
+
+	return s.redisPool
+}
+
+func (s *serviceProvider) UserCache() cache.UserCache {
+	if s.userCache == nil {
+		s.userCache = userCache.NewRedisCache(s.RedisPool(), s.AppCfg().Redis)
+	}
+
+	return s.userCache
+}
+
+func (s *serviceProvider) PasswordManager() client.PasswordManager {
+	if s.passwordManager == nil {
+		s.passwordManager = crypto.NewBCryptPasswordManager()
+	}
+
+	return s.passwordManager
 }

@@ -1,4 +1,4 @@
-package tests
+package service_tests
 
 import (
 	"context"
@@ -6,6 +6,10 @@ import (
 
 	"github.com/brianvoe/gofakeit"
 	"github.com/gojuno/minimock/v3"
+	"github.com/lookandhate/course_auth/internal/cache"
+	cacheMocks "github.com/lookandhate/course_auth/internal/cache/mocks"
+	"github.com/lookandhate/course_auth/internal/client"
+	clientMocks "github.com/lookandhate/course_auth/internal/client/mocks"
 	"github.com/lookandhate/course_auth/internal/repository"
 	repoMocks "github.com/lookandhate/course_auth/internal/repository/mocks"
 	"github.com/lookandhate/course_auth/internal/service/model"
@@ -18,6 +22,9 @@ import (
 func TestUpdate(t *testing.T) {
 	type userRepoMockFunc func(mc *minimock.Controller) repository.UserRepository
 	type txManagerMockFunc func(f func(context.Context) error, mc *minimock.Controller) db.TxManager
+	type userCacheMockFunc func(mc *minimock.Controller) cache.UserCache
+	type passwordManagerMockFunc func(mc *minimock.Controller) client.PasswordManager
+
 	type args struct {
 		ctx context.Context
 		req *model.UpdateUserModel
@@ -53,12 +60,14 @@ func TestUpdate(t *testing.T) {
 	)
 
 	tests := []struct {
-		name               string
-		args               args
-		expectedResult     *model.UserModel
-		err                error
-		userRepositoryMock userRepoMockFunc
-		txManagerMock      txManagerMockFunc
+		name                string
+		args                args
+		expectedResult      *model.UserModel
+		err                 error
+		userRepositoryMock  userRepoMockFunc
+		txManagerMock       txManagerMockFunc
+		userCacheMock       userCacheMockFunc
+		passwordManagerMock passwordManagerMockFunc
 	}{
 		{
 			name: "success",
@@ -72,11 +81,20 @@ func TestUpdate(t *testing.T) {
 				mock.UpdateUserMock.Expect(ctx, req).Return(expectedResponse, nil)
 				return mock
 			},
-			txManagerMock: func(f func(context.Context) error, mc *minimock.Controller) db.TxManager {
+			txManagerMock: func(_ func(context.Context) error, mc *minimock.Controller) db.TxManager {
 				mock := mocks.NewTxManagerMock(mc)
-				mock.ReadCommittedMock.Set(func(ctx context.Context, f db.Handler) (err error) {
+				mock.ReadCommittedMock.Set(func(ctx context.Context, f db.Handler) error {
 					return f(ctx)
 				})
+				return mock
+			},
+			userCacheMock: func(mc *minimock.Controller) cache.UserCache {
+				mock := cacheMocks.NewUserCacheMock(t)
+				return mock
+			},
+			passwordManagerMock: func(mc *minimock.Controller) client.PasswordManager {
+				mock := clientMocks.NewPasswordManagerMock(t)
+				mock.HashPasswordMock.Optional()
 				return mock
 			},
 		},
@@ -95,7 +113,10 @@ func TestUpdate(t *testing.T) {
 				}
 				return nil
 			}, mc)
-			serviceTest := userService.NewUserService(userRepoMock, txManagerMock)
+			userCacheMock := tt.userCacheMock(mc)
+			passwordManagerMock := tt.passwordManagerMock(mc)
+
+			serviceTest := userService.NewUserService(userRepoMock, txManagerMock, userCacheMock, passwordManagerMock)
 
 			newID, err := serviceTest.Update(tt.args.ctx, tt.args.req)
 			require.Equal(t, tt.err, err)

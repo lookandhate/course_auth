@@ -1,4 +1,4 @@
-package repoModel
+package repomodel
 
 import "time"
 

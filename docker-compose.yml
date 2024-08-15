@@ -13,6 +13,17 @@ services:
     networks:
       - auth_db_network
 
+  redis:
+    image: redis:7.4-alpine
+    env_file:
+      - .env
+    ports:
+      - "63790:6379"
+    volumes:
+      - redis:/data
+    networks:
+      - redis_network
+
   migrator:
     build:
       context: .
@@ -38,6 +49,9 @@ services:
 
 volumes:
   auth_db:
+  redis:
 networks:
   auth_db_network:
+    driver: bridge
+  redis_network:
     driver: bridge

@@ -3,8 +3,8 @@ package service
 import (
 	"context"
 
-	"github.com/lookandhate/course_auth/internal/convertor"
 	"github.com/lookandhate/course_auth/internal/service"
+	"github.com/lookandhate/course_auth/internal/service/convertor"
 	"github.com/lookandhate/course_auth/internal/service/model"
 )
 
@@ -25,8 +25,29 @@ func (s *Service) Register(ctx context.Context, user *model.CreateUserModel) (in
 	var createdUserID int
 	err := s.txManager.ReadCommitted(ctx, func(ctx context.Context) error {
 		var err error
-		createdUserID, err = s.repo.CreateUser(ctx, convertor.CreateUserModelToRepo(user))
-		return err
+
+		user.Password, err = s.passwordManager.HashPassword(user.Password)
+		if err != nil {
+			return err
+		}
+
+		createdUserID, err = s.repo.CreateUser(ctx, convertor.ServiceCreateUserModelToRepoCreateUserModel(user))
+		if err != nil {
+			return err
+		}
+
+		createdUserRepo, err := s.repo.GetUser(ctx, createdUserID)
+		if err != nil {
+			return err
+		}
+
+		createdUserService := convertor.RepoUserModelToServiceUserModel(createdUserRepo)
+		err = s.cache.Create(ctx, convertor.ServiceUserModelToCacheUserModel(createdUserService))
+		if err != nil {
+			return err
+		}
+
+		return nil
 	})
 
 	if err != nil {

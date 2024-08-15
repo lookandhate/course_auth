@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"github.com/Masterminds/squirrel"
-	"github.com/lookandhate/course_auth/internal/repository/convertor"
 	repository "github.com/lookandhate/course_auth/internal/repository/model"
+	"github.com/lookandhate/course_auth/internal/service/convertor"
 	"github.com/lookandhate/course_auth/internal/service/model"
 	"github.com/lookandhate/course_platform_lib/pkg/db"
 )
@@ -63,7 +63,7 @@ func (r *PostgresRepository) CreateUser(ctx context.Context, user *repository.Cr
 	return id, err
 }
 
-func (r *PostgresRepository) GetUser(ctx context.Context, id int) (*model.UserModel, error) {
+func (r *PostgresRepository) GetUser(ctx context.Context, id int) (*repository.UserModel, error) {
 	builder := squirrel.
 		Select(idColumn, emailColumn, passwordHashColumn, nameColumn, roleColumn).
 		PlaceholderFormat(squirrel.Dollar).
@@ -84,7 +84,7 @@ func (r *PostgresRepository) GetUser(ctx context.Context, id int) (*model.UserMo
 		return nil, err
 	}
 
-	return convertor.UserRepoToService(&user), nil
+	return &user, nil
 }
 
 func (r *PostgresRepository) UpdateUser(ctx context.Context, user *model.UpdateUserModel) (*model.UserModel, error) {
@@ -125,7 +125,7 @@ func (r *PostgresRepository) UpdateUser(ctx context.Context, user *model.UpdateU
 		return nil, err
 	}
 
-	return convertor.UserRepoToService(&updatedUser), nil
+	return convertor.RepoUserModelToServiceUserModel(&updatedUser), nil
 }
 
 func (r *PostgresRepository) DeleteUser(ctx context.Context, id int) error {

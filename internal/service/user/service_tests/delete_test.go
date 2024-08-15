@@ -1,4 +1,4 @@
-package tests
+package service_tests
 
 import (
 	"context"
@@ -6,6 +6,10 @@ import (
 
 	"github.com/brianvoe/gofakeit"
 	"github.com/gojuno/minimock/v3"
+	"github.com/lookandhate/course_auth/internal/cache"
+	cacheMocks "github.com/lookandhate/course_auth/internal/cache/mocks"
+	"github.com/lookandhate/course_auth/internal/client"
+	clientMocks "github.com/lookandhate/course_auth/internal/client/mocks"
 	"github.com/lookandhate/course_auth/internal/repository"
 	repoMocks "github.com/lookandhate/course_auth/internal/repository/mocks"
 	userService "github.com/lookandhate/course_auth/internal/service/user"
@@ -17,6 +21,8 @@ import (
 func TestDelete(t *testing.T) {
 	type userRepoMockFunc func(mc *minimock.Controller) repository.UserRepository
 	type txManagerMockFunc func(f func(context.Context) error, mc *minimock.Controller) db.TxManager
+	type userCacheMockFunc func(mc *minimock.Controller) cache.UserCache
+	type passwordManagerMockFunc func(mc *minimock.Controller) client.PasswordManager
 
 	type args struct {
 		ctx context.Context
@@ -31,11 +37,13 @@ func TestDelete(t *testing.T) {
 		mc  = minimock.NewController(t)
 	)
 	tests := []struct {
-		name               string
-		args               args
-		err                error
-		userRepositoryMock userRepoMockFunc
-		txManagerMock      txManagerMockFunc
+		name                string
+		args                args
+		err                 error
+		userRepositoryMock  userRepoMockFunc
+		txManagerMock       txManagerMockFunc
+		userCacheMock       userCacheMockFunc
+		passwordManagerMock passwordManagerMockFunc
 	}{
 		{
 			name: "success",
@@ -49,11 +57,21 @@ func TestDelete(t *testing.T) {
 				mock.DeleteUserMock.Expect(ctx, int(id)).Return(nil)
 				return mock
 			},
-			txManagerMock: func(f func(context.Context) error, mc *minimock.Controller) db.TxManager {
+			txManagerMock: func(_ func(context.Context) error, mc *minimock.Controller) db.TxManager {
 				mock := mocks.NewTxManagerMock(mc)
-				mock.ReadCommittedMock.Optional().Set(func(ctx context.Context, f db.Handler) (err error) {
+				mock.ReadCommittedMock.Optional().Set(func(ctx context.Context, f db.Handler) error {
 					return f(ctx)
 				})
+				return mock
+			},
+			userCacheMock: func(mc *minimock.Controller) cache.UserCache {
+				mock := cacheMocks.NewUserCacheMock(t)
+				mock.DeleteMock.Expect(ctx, int(id)).Return(nil)
+				return mock
+			},
+			passwordManagerMock: func(mc *minimock.Controller) client.PasswordManager {
+				mock := clientMocks.NewPasswordManagerMock(t)
+				mock.HashPasswordMock.Optional()
 				return mock
 			},
 		},
@@ -64,16 +82,15 @@ func TestDelete(t *testing.T) {
 
 			userRepoMock := tt.userRepositoryMock(mc)
 			txManagerMock := tt.txManagerMock(func(ctx context.Context) error {
-				var errTx error
-				errTx = userRepoMock.DeleteUser(ctx, int(id))
-				return errTx
+				return userRepoMock.DeleteUser(ctx, int(id))
 			}, mc)
-			serviceTest := userService.NewUserService(userRepoMock, txManagerMock)
+			userCacheMock := tt.userCacheMock(mc)
+			passwordManagerMock := tt.passwordManagerMock(mc)
+
+			serviceTest := userService.NewUserService(userRepoMock, txManagerMock, userCacheMock, passwordManagerMock)
 
 			err := serviceTest.Delete(tt.args.ctx, tt.args.req)
 			require.Equal(t, tt.err, err)
-
 		})
 	}
-
 }

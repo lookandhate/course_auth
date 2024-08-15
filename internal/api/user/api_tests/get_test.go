@@ -1,4 +1,4 @@
-package tests
+package api_tests
 
 import (
 	"context"
@@ -12,11 +12,10 @@ import (
 	"github.com/lookandhate/course_auth/internal/service/model"
 	userApi "github.com/lookandhate/course_auth/pkg/auth_v1"
 	"github.com/stretchr/testify/require"
-	"google.golang.org/protobuf/types/known/emptypb"
-	"google.golang.org/protobuf/types/known/wrapperspb"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-func TestUpdate(t *testing.T) {
+func TestGet(t *testing.T) {
 	t.Parallel()
 	type userServiceMockFunc func(mc *minimock.Controller) service.UserService
 
@@ -33,21 +32,17 @@ func TestUpdate(t *testing.T) {
 		createdAt = gofakeit.Date()
 		updatedAt = gofakeit.Date()
 
-		req = &userApi.UpdateRequest{
-			Id:       id,
-			Name:     &wrapperspb.StringValue{Value: name},
-			Email:    &wrapperspb.StringValue{Value: email},
-			Role:     userApi.UserRole(role),
-			Password: &wrapperspb.StringValue{Value: password},
+		req = &userApi.GetRequest{
+			Id: id,
 		}
-		info = model.UpdateUserModel{
-			ID:       int(id),
-			Name:     &name,
-			Email:    &email,
-			Password: &password,
-			Role:     role,
+		info = id
+		res  = &userApi.GetResponse{
+			Id:        id,
+			Name:      name,
+			Email:     email,
+			CreatedAt: timestamppb.New(createdAt),
+			UpdatedAt: timestamppb.New(updatedAt),
 		}
-		res             = &emptypb.Empty{}
 		serviceResponse = &model.UserModel{
 			Name:      name,
 			Email:     email,
@@ -58,16 +53,15 @@ func TestUpdate(t *testing.T) {
 			ID:        int(id),
 		}
 	)
-
 	type args struct {
 		ctx context.Context
-		req *userApi.UpdateRequest
+		req *userApi.GetRequest
 	}
 
 	tests := []struct {
 		name            string
 		args            args
-		expectedResult  *emptypb.Empty
+		expectedResult  *userApi.GetResponse
 		err             error
 		userServiceMock userServiceMockFunc
 	}{
@@ -79,7 +73,7 @@ func TestUpdate(t *testing.T) {
 			err:            nil,
 			userServiceMock: func(mc *minimock.Controller) service.UserService {
 				mock := serviceMocks.NewUserServiceMock(mc)
-				mock.UpdateMock.Expect(ctx, &info).Return(serviceResponse, nil)
+				mock.GetMock.Expect(ctx, int(info)).Return(serviceResponse, nil)
 				return mock
 			},
 		},
@@ -90,7 +84,7 @@ func TestUpdate(t *testing.T) {
 			err:            service.ErrUserDoesNotExist,
 			userServiceMock: func(mc *minimock.Controller) service.UserService {
 				mock := serviceMocks.NewUserServiceMock(mc)
-				mock.UpdateMock.Expect(ctx, &info).Return(nil, service.ErrUserDoesNotExist)
+				mock.GetMock.Expect(ctx, int(id)).Return(nil, service.ErrUserDoesNotExist)
 				return mock
 			},
 		},
@@ -102,7 +96,7 @@ func TestUpdate(t *testing.T) {
 			userServiceMock := tt.userServiceMock(mc)
 			api := user.NewAuthServer(userServiceMock)
 
-			userData, err := api.Update(tt.args.ctx, tt.args.req)
+			userData, err := api.Get(tt.args.ctx, tt.args.req)
 			require.Equal(t, tt.err, err)
 			require.Equal(t, tt.expectedResult, userData)
 		})
