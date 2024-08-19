@@ -1,4 +1,4 @@
-package service_tests
+package service_test
 
 import (
 	"context"
@@ -65,12 +65,12 @@ func TestDelete(t *testing.T) {
 				return mock
 			},
 			userCacheMock: func(mc *minimock.Controller) cache.UserCache {
-				mock := cacheMocks.NewUserCacheMock(t)
+				mock := cacheMocks.NewUserCacheMock(mc)
 				mock.DeleteMock.Expect(ctx, int(id)).Return(nil)
 				return mock
 			},
 			passwordManagerMock: func(mc *minimock.Controller) client.PasswordManager {
-				mock := clientMocks.NewPasswordManagerMock(t)
+				mock := clientMocks.NewPasswordManagerMock(mc)
 				mock.HashPasswordMock.Optional()
 				return mock
 			},

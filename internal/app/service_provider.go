@@ -66,7 +66,9 @@ func (s *serviceProvider) UserRepository(ctx context.Context) repository.UserRep
 // UserService creates and returns service.UserService.
 func (s *serviceProvider) UserService(ctx context.Context) service.UserService {
 	if s.userService == nil {
-		s.userService = userService.NewUserService(s.UserRepository(ctx), s.TxManager(ctx), s.UserCache(), s.PasswordManager())
+		s.userService = userService.NewUserService(
+			s.UserRepository(ctx), s.TxManager(ctx), s.UserCache(), s.PasswordManager(),
+		)
 	}
 
 	return s.userService

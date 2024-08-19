@@ -15,6 +15,12 @@ type RedisCache struct {
 	redisClient *redis.Client
 }
 
+func NewRedisCache(redisPool *redigo.Pool, redisCfg config.RedisConfig) *RedisCache {
+	client := redis.NewClient(redisPool, time.Duration(redisCfg.IdleTimeout))
+
+	return &RedisCache{redisClient: client}
+}
+
 // Create user record in cache as model.UserModel.
 func (r RedisCache) Create(ctx context.Context, user *model.UserModel) error {
 	err := r.redisClient.HashSet(ctx, r.userKey(user.ID), user)
@@ -44,12 +50,6 @@ func (r RedisCache) Get(ctx context.Context, id int) (*model.UserModel, error) {
 // Delete record from cache.
 func (r RedisCache) Delete(ctx context.Context, id int) error {
 	return r.redisClient.Del(ctx, r.userKey(int64(id)))
-}
-
-func NewRedisCache(redisPool *redigo.Pool, redisCfg config.RedisConfig) *RedisCache {
-	client := redis.NewClient(redisPool, time.Duration(redisCfg.IdleTimeout))
-
-	return &RedisCache{redisClient: client}
 }
 
 // userKey returns redis key for user.

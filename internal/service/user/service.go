@@ -16,7 +16,12 @@ type Service struct {
 }
 
 // NewUserService creates Service with given repo.
-func NewUserService(repo repository.UserRepository, manager db.TxManager, cache cache.UserCache, passwordManager client.PasswordManager) *Service {
+func NewUserService(
+	repo repository.UserRepository,
+	manager db.TxManager,
+	cache cache.UserCache,
+	passwordManager client.PasswordManager,
+) *Service {
 	return &Service{
 		repo:            repo,
 		txManager:       manager,

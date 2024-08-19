@@ -1,4 +1,4 @@
-package api_tests
+package api_test
 
 import (
 	"context"
@@ -12,10 +12,9 @@ import (
 	"github.com/lookandhate/course_auth/internal/service/model"
 	userApi "github.com/lookandhate/course_auth/pkg/auth_v1"
 	"github.com/stretchr/testify/require"
-	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-func TestGet(t *testing.T) {
+func TestCreate(t *testing.T) {
 	t.Parallel()
 	type userServiceMockFunc func(mc *minimock.Controller) service.UserService
 
@@ -24,44 +23,39 @@ func TestGet(t *testing.T) {
 
 		mc = minimock.NewController(t)
 
-		email     = gofakeit.Email()
-		id        = gofakeit.Int64()
-		name      = gofakeit.Name()
-		password  = gofakeit.Password(true, true, true, true, true, 10)
-		role      = 1
-		createdAt = gofakeit.Date()
-		updatedAt = gofakeit.Date()
+		email    = gofakeit.Email()
+		id       = gofakeit.Int64()
+		name     = gofakeit.Name()
+		password = gofakeit.Password(true, true, true, true, true, 10)
+		role     = 1
 
-		req = &userApi.GetRequest{
+		req = &userApi.CreateRequest{
+			Name:            name,
+			Email:           email,
+			Password:        password,
+			PasswordConfirm: password,
+			Role:            userApi.UserRole(role),
+		}
+		info = &model.CreateUserModel{
+			Name:            name,
+			Email:           email,
+			Password:        password,
+			PasswordConfirm: password,
+			Role:            model.UserRole(role),
+		}
+		res = &userApi.CreateResponse{
 			Id: id,
-		}
-		info = id
-		res  = &userApi.GetResponse{
-			Id:        id,
-			Name:      name,
-			Email:     email,
-			CreatedAt: timestamppb.New(createdAt),
-			UpdatedAt: timestamppb.New(updatedAt),
-		}
-		serviceResponse = &model.UserModel{
-			Name:      name,
-			Email:     email,
-			Password:  password,
-			Role:      role,
-			CreatedAt: createdAt,
-			UpdatedAt: updatedAt,
-			ID:        int(id),
 		}
 	)
 	type args struct {
 		ctx context.Context
-		req *userApi.GetRequest
+		req *userApi.CreateRequest
 	}
 
 	tests := []struct {
 		name            string
 		args            args
-		expectedResult  *userApi.GetResponse
+		expectedResult  *userApi.CreateResponse
 		err             error
 		userServiceMock userServiceMockFunc
 	}{
@@ -73,18 +67,18 @@ func TestGet(t *testing.T) {
 			err:            nil,
 			userServiceMock: func(mc *minimock.Controller) service.UserService {
 				mock := serviceMocks.NewUserServiceMock(mc)
-				mock.GetMock.Expect(ctx, int(info)).Return(serviceResponse, nil)
+				mock.RegisterMock.Expect(ctx, info).Return(id, nil)
 				return mock
 			},
 		},
 		{
-			name:           "fail case does not exist",
+			name:           "fail case",
 			args:           args{ctx: ctx, req: req},
 			expectedResult: nil,
-			err:            service.ErrUserDoesNotExist,
+			err:            service.ErrPasswordMismatch,
 			userServiceMock: func(mc *minimock.Controller) service.UserService {
 				mock := serviceMocks.NewUserServiceMock(mc)
-				mock.GetMock.Expect(ctx, int(id)).Return(nil, service.ErrUserDoesNotExist)
+				mock.RegisterMock.Expect(ctx, info).Return(id, service.ErrPasswordMismatch)
 				return mock
 			},
 		},
@@ -96,9 +90,9 @@ func TestGet(t *testing.T) {
 			userServiceMock := tt.userServiceMock(mc)
 			api := user.NewAuthServer(userServiceMock)
 
-			userData, err := api.Get(tt.args.ctx, tt.args.req)
+			newID, err := api.Create(tt.args.ctx, tt.args.req)
 			require.Equal(t, tt.err, err)
-			require.Equal(t, tt.expectedResult, userData)
+			require.Equal(t, tt.expectedResult, newID)
 		})
 	}
 }
