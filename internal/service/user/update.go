@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"errors"
+	"log"
 
 	"github.com/lookandhate/course_auth/internal/service"
 	"github.com/lookandhate/course_auth/internal/service/model"
@@ -28,6 +29,12 @@ func (s *Service) Update(ctx context.Context, user *model.UpdateUserModel) (*mod
 	})
 	if err != nil {
 		return nil, err
+	}
+
+	// Invalidate user cache
+	err = s.cache.Delete(ctx, updatedUser.ID)
+	if err != nil {
+		log.Printf("Error when deleting user from cache: %v", err)
 	}
 
 	return updatedUser, nil

@@ -13,7 +13,7 @@ func (s *Service) Delete(ctx context.Context, id int) error {
 
 	err := s.cache.Delete(ctx, id)
 	if err != nil {
-		log.Default().Println(err)
+		log.Printf("Error when deleting user from cache: %v", err)
 	}
 
 	return s.repo.DeleteUser(ctx, id)
