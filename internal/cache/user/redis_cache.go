@@ -6,8 +6,10 @@ import (
 	"time"
 
 	redigo "github.com/gomodule/redigo/redis"
+	"github.com/lookandhate/course_auth/internal/cache/convertor"
 	"github.com/lookandhate/course_auth/internal/cache/model"
 	"github.com/lookandhate/course_auth/internal/config"
+	serviceModel "github.com/lookandhate/course_auth/internal/service/model"
 	"github.com/lookandhate/course_platform_lib/pkg/cache/redis"
 )
 
@@ -22,8 +24,9 @@ func NewRedisCache(redisPool *redigo.Pool, redisCfg config.RedisConfig) *RedisCa
 }
 
 // Create user record in cache as model.UserModel.
-func (r RedisCache) Create(ctx context.Context, user *model.UserModel) error {
-	err := r.redisClient.HashSet(ctx, r.userKey(user.ID), user)
+func (r RedisCache) Create(ctx context.Context, user *serviceModel.UserModel) error {
+	userCacheModel := convertor.ServiceUserModelToCacheUserModel(user)
+	err := r.redisClient.HashSet(ctx, r.userKey(userCacheModel.ID), user)
 	if err != nil {
 		return err
 	}
@@ -32,7 +35,7 @@ func (r RedisCache) Create(ctx context.Context, user *model.UserModel) error {
 }
 
 // Get user record from cache.
-func (r RedisCache) Get(ctx context.Context, id int) (*model.UserModel, error) {
+func (r RedisCache) Get(ctx context.Context, id int) (*serviceModel.UserModel, error) {
 	response, err := r.redisClient.HGetAll(ctx, r.userKey(int64(id)))
 	if err != nil {
 		return nil, err
@@ -44,7 +47,7 @@ func (r RedisCache) Get(ctx context.Context, id int) (*model.UserModel, error) {
 		return nil, err
 	}
 
-	return &user, nil
+	return convertor.CacheUserModelToServiceUserModel(&user), nil
 }
 
 // Delete record from cache.

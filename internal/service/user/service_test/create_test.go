@@ -9,14 +9,11 @@ import (
 	"github.com/gojuno/minimock/v3"
 	"github.com/lookandhate/course_auth/internal/cache"
 	cacheMocks "github.com/lookandhate/course_auth/internal/cache/mocks"
-	cacheModel "github.com/lookandhate/course_auth/internal/cache/model"
 	"github.com/lookandhate/course_auth/internal/client"
 	clientMocks "github.com/lookandhate/course_auth/internal/client/mocks"
 	"github.com/lookandhate/course_auth/internal/repository"
 	repoMocks "github.com/lookandhate/course_auth/internal/repository/mocks"
-	repomodel "github.com/lookandhate/course_auth/internal/repository/model"
 	"github.com/lookandhate/course_auth/internal/service"
-	"github.com/lookandhate/course_auth/internal/service/convertor"
 	"github.com/lookandhate/course_auth/internal/service/model"
 	userService "github.com/lookandhate/course_auth/internal/service/user"
 	"github.com/lookandhate/course_platform_lib/pkg/db"
@@ -47,21 +44,14 @@ func TestCreate(t *testing.T) {
 		role     = gofakeit.Number(1, 2)
 		timeNow  = time.Now()
 
-		req = &model.CreateUserModel{
+		reqSuccess = &model.CreateUserModel{
 			Name:            name,
 			Email:           email,
 			Password:        password,
 			PasswordConfirm: password,
 			Role:            model.UserRole(role),
 		}
-		reqPassMismatch = &model.CreateUserModel{
-			Name:            name,
-			Email:           email,
-			Password:        password,
-			PasswordConfirm: gofakeit.Name(),
-			Role:            model.UserRole(role),
-		}
-		repoUserModel = &repomodel.UserModel{
+		responseSuccess = &model.UserModel{
 			ID:        int(id),
 			Name:      name,
 			Email:     email,
@@ -70,14 +60,12 @@ func TestCreate(t *testing.T) {
 			CreatedAt: timeNow,
 			UpdatedAt: timeNow,
 		}
-		userCacheModel = &cacheModel.UserModel{
-			ID:          id,
-			Name:        name,
-			Email:       email,
-			Role:        role,
-			Password:    password,
-			CreatedAtNS: timeNow.UnixNano(),
-			UpdatedAtNS: timeNow.UnixNano(),
+		reqPassMismatch = &model.CreateUserModel{
+			Name:            name,
+			Email:           email,
+			Password:        password,
+			PasswordConfirm: gofakeit.Name(),
+			Role:            model.UserRole(role),
 		}
 	)
 	tests := []struct {
@@ -94,13 +82,13 @@ func TestCreate(t *testing.T) {
 			name: "success",
 			args: args{
 				ctx: ctx,
-				req: req,
+				req: reqSuccess,
 			},
 			expectedResult: int(id),
 			userRepositoryMock: func(mc *minimock.Controller) repository.UserRepository {
 				mock := repoMocks.NewUserRepositoryMock(mc)
-				mock.CreateUserMock.Expect(ctx, convertor.ServiceCreateUserModelToRepoCreateUserModel(req)).Return(int(id), nil)
-				mock.GetUserMock.Expect(ctx, int(id)).Return(repoUserModel, nil)
+				mock.CreateUserMock.Expect(ctx, reqSuccess).Return(int(id), nil)
+				mock.GetUserMock.Expect(ctx, int(id)).Return(responseSuccess, nil)
 				return mock
 			},
 			txManagerMock: func(_ func(context.Context) error, mc *minimock.Controller) db.TxManager {
@@ -112,7 +100,7 @@ func TestCreate(t *testing.T) {
 			},
 			userCacheMock: func(mc *minimock.Controller) cache.UserCache {
 				mock := cacheMocks.NewUserCacheMock(mc)
-				mock.CreateMock.Expect(ctx, userCacheModel).Return(nil)
+				mock.CreateMock.Expect(ctx, responseSuccess).Return(nil)
 				return mock
 			},
 			passwordManagerMock: func(mc *minimock.Controller) client.PasswordManager {
@@ -132,7 +120,7 @@ func TestCreate(t *testing.T) {
 			userRepositoryMock: func(mc *minimock.Controller) repository.UserRepository {
 				mock := repoMocks.NewUserRepositoryMock(mc)
 				mock.CreateUserMock.Optional().
-					Expect(ctx, convertor.ServiceCreateUserModelToRepoCreateUserModel(reqPassMismatch)).Return(0, nil)
+					Expect(ctx, reqPassMismatch).Return(0, nil)
 				return mock
 			},
 			txManagerMock: func(_ func(context.Context) error, mc *minimock.Controller) db.TxManager {
@@ -144,7 +132,7 @@ func TestCreate(t *testing.T) {
 			},
 			userCacheMock: func(mc *minimock.Controller) cache.UserCache {
 				mock := cacheMocks.NewUserCacheMock(mc)
-				mock.CreateMock.Optional().Expect(ctx, userCacheModel).Return(nil)
+				mock.CreateMock.Optional().Return(nil)
 				return mock
 			},
 			passwordManagerMock: func(mc *minimock.Controller) client.PasswordManager {
@@ -161,7 +149,7 @@ func TestCreate(t *testing.T) {
 			userRepoMock := tt.userRepositoryMock(mc)
 			txManagerMock := tt.txManagerMock(func(ctx context.Context) error {
 				var errTx error
-				idInt, errTx := userRepoMock.CreateUser(ctx, convertor.ServiceCreateUserModelToRepoCreateUserModel(req))
+				idInt, errTx := userRepoMock.CreateUser(ctx, tt.args.req)
 				id = int64(idInt)
 				if errTx != nil {
 					return errTx

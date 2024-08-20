@@ -9,12 +9,10 @@ import (
 	"github.com/gojuno/minimock/v3"
 	"github.com/lookandhate/course_auth/internal/cache"
 	cacheMocks "github.com/lookandhate/course_auth/internal/cache/mocks"
-	cacheModel "github.com/lookandhate/course_auth/internal/cache/model"
 	"github.com/lookandhate/course_auth/internal/client"
 	clientMocks "github.com/lookandhate/course_auth/internal/client/mocks"
 	"github.com/lookandhate/course_auth/internal/repository"
 	repoMocks "github.com/lookandhate/course_auth/internal/repository/mocks"
-	repomodel "github.com/lookandhate/course_auth/internal/repository/model"
 	"github.com/lookandhate/course_auth/internal/service"
 	"github.com/lookandhate/course_auth/internal/service/model"
 	userService "github.com/lookandhate/course_auth/internal/service/user"
@@ -57,24 +55,6 @@ func TestGet(t *testing.T) {
 			CreatedAt: timeNow,
 			UpdatedAt: timeNow,
 		}
-		repoResponse = &repomodel.UserModel{
-			ID:        int(id),
-			Name:      name,
-			Email:     email,
-			Role:      role,
-			Password:  password,
-			CreatedAt: timeNow,
-			UpdatedAt: timeNow,
-		}
-		userCache = &cacheModel.UserModel{
-			ID:          int64(id),
-			Name:        name,
-			Email:       email,
-			Role:        role,
-			Password:    password,
-			CreatedAtNS: timeNow.UnixNano(),
-			UpdatedAtNS: timeNow.UnixNano(),
-		}
 	)
 
 	tests := []struct {
@@ -97,7 +77,7 @@ func TestGet(t *testing.T) {
 			err:            nil,
 			userRepositoryMock: func(mc *minimock.Controller) repository.UserRepository {
 				mock := repoMocks.NewUserRepositoryMock(mc)
-				mock.GetUserMock.Expect(ctx, int(req)).Return(repoResponse, nil)
+				mock.GetUserMock.Expect(ctx, int(req)).Return(expectedResponse, nil)
 				mock.CheckUserExistsMock.Expect(ctx, int(id)).Return(true, nil)
 				return mock
 			},
@@ -111,7 +91,7 @@ func TestGet(t *testing.T) {
 			userCacheMock: func(mc *minimock.Controller) cache.UserCache {
 				mock := cacheMocks.NewUserCacheMock(mc)
 				mock.GetMock.Optional().Expect(ctx, int(req)).Return(nil, nil)
-				mock.CreateMock.Optional().Expect(ctx, userCache).Return(nil)
+				mock.CreateMock.Optional().Expect(ctx, expectedResponse).Return(nil)
 				return mock
 			},
 			passwordManagerMock: func(mc *minimock.Controller) client.PasswordManager {

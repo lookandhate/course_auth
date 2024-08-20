@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/lookandhate/course_auth/internal/service"
-	"github.com/lookandhate/course_auth/internal/service/convertor"
 	"github.com/lookandhate/course_auth/internal/service/model"
 )
 
@@ -31,18 +30,17 @@ func (s *Service) Register(ctx context.Context, user *model.CreateUserModel) (in
 			return err
 		}
 
-		createdUserID, err = s.repo.CreateUser(ctx, convertor.ServiceCreateUserModelToRepoCreateUserModel(user))
+		createdUserID, err = s.repo.CreateUser(ctx, user)
 		if err != nil {
 			return err
 		}
 
-		createdUserRepo, err := s.repo.GetUser(ctx, createdUserID)
+		createdUser, err := s.repo.GetUser(ctx, createdUserID)
 		if err != nil {
 			return err
 		}
 
-		createdUserService := convertor.RepoUserModelToServiceUserModel(createdUserRepo)
-		err = s.cache.Create(ctx, convertor.ServiceUserModelToCacheUserModel(createdUserService))
+		err = s.cache.Create(ctx, createdUser)
 		if err != nil {
 			return err
 		}

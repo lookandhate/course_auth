@@ -3,14 +3,13 @@ package repository
 import (
 	"context"
 
-	repository "github.com/lookandhate/course_auth/internal/repository/model"
 	"github.com/lookandhate/course_auth/internal/service/model"
 )
 
 type UserRepository interface {
-	CreateUser(context context.Context, user *repository.CreateUserModel) (int, error)
-	GetUser(context context.Context, id int) (*repository.UserModel, error)
-	UpdateUser(context context.Context, updateUser *model.UpdateUserModel) (*model.UserModel, error)
-	DeleteUser(context context.Context, id int) error
-	CheckUserExists(context context.Context, id int) (bool, error)
+	CreateUser(ctx context.Context, user *model.CreateUserModel) (int, error)
+	GetUser(ctx context.Context, id int) (*model.UserModel, error)
+	UpdateUser(ctx context.Context, updateUser *model.UpdateUserModel) (*model.UserModel, error)
+	DeleteUser(ctx context.Context, id int) error
+	CheckUserExists(ctx context.Context, id int) (bool, error)
 }

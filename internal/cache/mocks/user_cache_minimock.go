@@ -11,7 +11,7 @@ import (
 	mm_time "time"
 
 	"github.com/gojuno/minimock/v3"
-	model "github.com/lookandhate/course_auth/internal/cache/model"
+	model "github.com/lookandhate/course_auth/internal/service/model"
 )
 
 // UserCacheMock implements cache.UserCache
