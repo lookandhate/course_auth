@@ -90,6 +90,7 @@ func TestUpdate(t *testing.T) {
 			},
 			userCacheMock: func(mc *minimock.Controller) cache.UserCache {
 				mock := cacheMocks.NewUserCacheMock(mc)
+				mock.DeleteMock.Expect(ctx, int(id)).Return(nil)
 				return mock
 			},
 			passwordManagerMock: func(mc *minimock.Controller) client.PasswordManager {
