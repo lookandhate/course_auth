@@ -35,6 +35,7 @@ func (s *Service) Update(ctx context.Context, user *model.UpdateUserModel) (*mod
 	err = s.cache.Delete(ctx, updatedUser.ID)
 	if err != nil {
 		log.Printf("Error when deleting user from cache: %v", err)
+		return nil, err
 	}
 
 	return updatedUser, nil
