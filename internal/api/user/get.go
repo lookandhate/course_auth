@@ -3,7 +3,7 @@ package user
 import (
 	"context"
 
-	"github.com/lookandhate/course_auth/internal/convertor"
+	"github.com/lookandhate/course_auth/internal/service/convertor"
 	authAPI "github.com/lookandhate/course_auth/pkg/auth_v1"
 )
 

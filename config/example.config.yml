@@ -7,3 +7,6 @@ db:
   db_name: "auth"
   password: "POSTGRES_PASSWORD"
   user: "POSTGRES_USER"
+redis:
+  host: "localhost"
+  port: "63790"

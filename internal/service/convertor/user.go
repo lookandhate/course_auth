@@ -1,7 +1,6 @@
 package convertor
 
 import (
-	repository "github.com/lookandhate/course_auth/internal/repository/model"
 	"github.com/lookandhate/course_auth/internal/service/model"
 	"github.com/lookandhate/course_auth/pkg/auth_v1"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -19,21 +18,6 @@ func CreateUserFromProto(user *auth_v1.CreateRequest) *model.CreateUserModel {
 		Password:        user.GetPassword(),
 		PasswordConfirm: user.GetPasswordConfirm(),
 		Role:            model.UserRole(user.GetRole()),
-	}
-}
-
-// CreateUserModelToRepo converts model from service layer to repo layer.
-func CreateUserModelToRepo(user *model.CreateUserModel) *repository.CreateUserModel {
-	if user == nil {
-		return nil
-	}
-
-	return &repository.CreateUserModel{
-		Name:  user.Name,
-		Email: user.Email,
-		// TODO hashing
-		Password: user.Password,
-		Role:     repository.UserRole(user.Role),
 	}
 }
 

@@ -5,8 +5,8 @@ import (
 	"log"
 	"net"
 
-	"github.com/lookandhate/course_auth/internal/closer"
 	"github.com/lookandhate/course_auth/pkg/auth_v1"
+	"github.com/lookandhate/course_platform_lib/pkg/closer"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
