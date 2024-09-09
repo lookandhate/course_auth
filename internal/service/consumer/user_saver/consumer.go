@@ -50,7 +50,6 @@ func (s *service) run(ctx context.Context) <-chan error {
 
 	go func() {
 		defer close(errChan)
-
 		errChan <- s.consumer.Consume(ctx, s.config.TopicName, s.UserSaveHandler)
 	}()
 
