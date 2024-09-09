@@ -6,6 +6,7 @@ import (
 	"github.com/lookandhate/course_auth/internal/config"
 	"github.com/lookandhate/course_auth/internal/repository"
 	"github.com/lookandhate/course_auth/internal/service/consumer"
+	_ "github.com/lookandhate/course_auth/internal/service/consumer"
 	kafka "github.com/lookandhate/course_platform_lib/pkg/message_queue/kafka/client"
 )
 

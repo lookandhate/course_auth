@@ -2,13 +2,9 @@ package app
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"net"
-	"os"
-	"os/signal"
 	"sync"
-	"syscall"
 
 	"github.com/lookandhate/course_auth/pkg/auth_v1"
 	"github.com/lookandhate/course_platform_lib/pkg/closer"
@@ -37,10 +33,8 @@ func (a *App) Run(ctx context.Context) error {
 		closer.Wait()
 	}()
 
-	ctx, cancel := context.WithCancel(ctx)
-
 	wg := &sync.WaitGroup{}
-	wg.Add(1)
+	wg.Add(2) //nolint:mnd // not really a magic number
 
 	go func() {
 		defer wg.Done()
@@ -60,7 +54,7 @@ func (a *App) Run(ctx context.Context) error {
 		}
 	}()
 
-	gracefulShutdown(ctx, cancel, wg)
+	wg.Wait()
 
 	return nil
 }
@@ -109,28 +103,4 @@ func (a *App) runGRPCServer() error {
 	}
 
 	return nil
-}
-
-func gracefulShutdown(ctx context.Context, cancelFunc context.CancelFunc, wg *sync.WaitGroup) {
-	select {
-	case <-ctx.Done():
-		log.Printf("terminating due to context cancelling")
-		break
-	case <-waitSignal():
-		log.Printf("terminating via term sig")
-		break
-
-	}
-	cancelFunc()
-
-	if wg != nil {
-		wg.Wait()
-		fmt.Printf("After wait")
-	}
-}
-
-func waitSignal() chan os.Signal {
-	sigterm := make(chan os.Signal, 1)
-	signal.Notify(sigterm, syscall.SIGINT, syscall.SIGTERM)
-	return sigterm
 }

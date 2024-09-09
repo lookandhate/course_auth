@@ -184,8 +184,8 @@ func (s *serviceProvider) ConsumerGroup() sarama.ConsumerGroup {
 	}
 
 	return s.consumerGroup
-
 }
+
 func (s *serviceProvider) ConsumerGroupHandler() *consumer.GroupHandler {
 	if s.consumerGroupHandler == nil {
 		s.consumerGroupHandler = consumer.NewGroupHandler()

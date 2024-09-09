@@ -12,11 +12,11 @@ const (
 
 // CreateUserModel user representation for creation at service level.
 type CreateUserModel struct {
-	Name            string
-	Email           string
-	Password        string
-	PasswordConfirm string
-	Role            UserRole
+	Name            string   `json:"name,omitempty"`
+	Email           string   `json:"email,omitempty"`
+	Password        string   `json:"password,omitempty"`
+	PasswordConfirm string   `json:"password_confirm,omitempty"`
+	Role            UserRole `json:"role,omitempty"`
 }
 
 // UserModel at service level.
