@@ -5,6 +5,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/IBM/sarama"
 	redigo "github.com/gomodule/redigo/redis"
 	userServer "github.com/lookandhate/course_auth/internal/api/user"
 	"github.com/lookandhate/course_auth/internal/cache"
@@ -15,11 +16,15 @@ import (
 	"github.com/lookandhate/course_auth/internal/repository"
 	userRepo "github.com/lookandhate/course_auth/internal/repository/user"
 	"github.com/lookandhate/course_auth/internal/service"
+	consumerService "github.com/lookandhate/course_auth/internal/service/consumer"
+	"github.com/lookandhate/course_auth/internal/service/consumer/user_saver"
 	userService "github.com/lookandhate/course_auth/internal/service/user"
 	"github.com/lookandhate/course_platform_lib/pkg/closer"
 	"github.com/lookandhate/course_platform_lib/pkg/db"
 	"github.com/lookandhate/course_platform_lib/pkg/db/pg"
 	"github.com/lookandhate/course_platform_lib/pkg/db/transaction"
+	kafka "github.com/lookandhate/course_platform_lib/pkg/message_queue/kafka/client"
+	"github.com/lookandhate/course_platform_lib/pkg/message_queue/kafka/client/consumer"
 )
 
 // serviceProvider is a DI container.
@@ -37,7 +42,13 @@ type serviceProvider struct {
 	userService    service.UserService
 	userServerImpl *userServer.Server
 
+	userSaverConsumer consumerService.ConsumerService
+
 	passwordManager client.PasswordManager
+
+	consumer             kafka.Consumer
+	consumerGroup        sarama.ConsumerGroup
+	consumerGroupHandler *consumer.GroupHandler
 }
 
 // newServiceProvider creates plain serviceProvider.
@@ -100,6 +111,14 @@ func (s *serviceProvider) DBClient(ctx context.Context) db.Client {
 	return s.dbClient
 }
 
+func (s *serviceProvider) UserSaverConsumer(ctx context.Context) consumerService.ConsumerService {
+	if s.userSaverConsumer == nil {
+		s.userSaverConsumer = user_saver.NewService(s.UserRepository(ctx), s.Consumer(), s.AppCfg().Kafka)
+	}
+
+	return s.userSaverConsumer
+}
+
 func (s *serviceProvider) TxManager(ctx context.Context) db.TxManager {
 	if s.transactionManager == nil {
 		s.transactionManager = transaction.NewTransactionManager(s.DBClient(ctx).DB())
@@ -136,4 +155,41 @@ func (s *serviceProvider) PasswordManager() client.PasswordManager {
 	}
 
 	return s.passwordManager
+}
+
+func (s *serviceProvider) Consumer() kafka.Consumer {
+	if s.consumer == nil {
+		s.consumer = consumer.NewConsumer(
+			s.ConsumerGroup(), s.ConsumerGroupHandler(),
+		)
+		closer.Add(s.consumer.Close)
+	}
+
+	return s.consumer
+}
+
+func (s *serviceProvider) ConsumerGroup() sarama.ConsumerGroup {
+	if s.consumerGroup == nil {
+		consumerGroup, err := sarama.NewConsumerGroup(
+			s.AppCfg().Kafka.Brokers,
+			s.AppCfg().Kafka.Group,
+			s.AppCfg().Kafka.Config(),
+		)
+		if err != nil {
+			log.Fatalf("Failed to init sarama consumer group: %v", err)
+		}
+
+		s.consumerGroup = consumerGroup
+		closer.Add(s.consumerGroup.Close)
+	}
+
+	return s.consumerGroup
+
+}
+func (s *serviceProvider) ConsumerGroupHandler() *consumer.GroupHandler {
+	if s.consumerGroupHandler == nil {
+		s.consumerGroupHandler = consumer.NewGroupHandler()
+	}
+
+	return s.consumerGroupHandler
 }
