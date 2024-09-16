@@ -2,7 +2,7 @@ package user
 
 import (
 	"github.com/lookandhate/course_auth/internal/service"
-	authAPI "github.com/lookandhate/course_auth/pkg/auth_v1"
+	authAPI "github.com/lookandhate/course_auth/pkg/user_v1"
 )
 
 type Server struct {

@@ -6,7 +6,7 @@ import (
 	"net"
 	"sync"
 
-	"github.com/lookandhate/course_auth/pkg/auth_v1"
+	"github.com/lookandhate/course_auth/pkg/user_v1"
 	"github.com/lookandhate/course_platform_lib/pkg/closer"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -83,7 +83,7 @@ func (a *App) initServiceProvider(_ context.Context) error {
 func (a *App) initGRPCServer(ctx context.Context) error {
 	a.grpcServer = grpc.NewServer(grpc.Creds(insecure.NewCredentials()))
 
-	auth_v1.RegisterAuthServer(a.grpcServer, a.serviceProvider.UserServerImpl(ctx))
+	user_v1.RegisterAuthServer(a.grpcServer, a.serviceProvider.UserServerImpl(ctx))
 
 	return nil
 }

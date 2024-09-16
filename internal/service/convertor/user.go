@@ -2,12 +2,12 @@ package convertor
 
 import (
 	"github.com/lookandhate/course_auth/internal/service/model"
-	"github.com/lookandhate/course_auth/pkg/auth_v1"
+	"github.com/lookandhate/course_auth/pkg/user_v1"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 // CreateUserFromProto converts data from protobuf generated struct to service CreateUserModel.
-func CreateUserFromProto(user *auth_v1.CreateRequest) *model.CreateUserModel {
+func CreateUserFromProto(user *user_v1.CreateRequest) *model.CreateUserModel {
 	if user == nil {
 		return nil
 	}
@@ -22,12 +22,12 @@ func CreateUserFromProto(user *auth_v1.CreateRequest) *model.CreateUserModel {
 }
 
 // UserModelToGetResponseProto converts from UserModel to proto response.
-func UserModelToGetResponseProto(user *model.UserModel) *auth_v1.GetResponse {
+func UserModelToGetResponseProto(user *model.UserModel) *user_v1.GetResponse {
 	if user == nil {
 		return nil
 	}
 
-	return &auth_v1.GetResponse{
+	return &user_v1.GetResponse{
 		Id:        int64(user.ID),
 		Name:      user.Name,
 		Email:     user.Email,
@@ -37,7 +37,7 @@ func UserModelToGetResponseProto(user *model.UserModel) *auth_v1.GetResponse {
 }
 
 // UserUpdateFromProto converts from proto UpdateRequest to UpdateUserModel.
-func UserUpdateFromProto(user *auth_v1.UpdateRequest) *model.UpdateUserModel {
+func UserUpdateFromProto(user *user_v1.UpdateRequest) *model.UpdateUserModel {
 	if user == nil {
 		return nil
 	}

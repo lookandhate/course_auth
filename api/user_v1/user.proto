@@ -1,7 +1,7 @@
 syntax = "proto3";
 
 package auth_v1;
-option go_package = "github.com/lookandhate/microservice-course/chat/pkg/auth_v1;auth_v1";
+option go_package = "github.com/lookandhate/microservice-course/chat/pkg/user_v1;user_v1";
 
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/empty.proto";
@@ -55,4 +55,13 @@ message UpdateRequest {
 
 message DeleteRequest {
   int64 id = 1;
+}
+
+message LoginRequest {
+  string email = 1;
+  string password = 2;
+}
+
+message LoginResponse {
+  string refresh_token = 1;
 }

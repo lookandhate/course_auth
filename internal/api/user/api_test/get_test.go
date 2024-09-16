@@ -10,7 +10,7 @@ import (
 	"github.com/lookandhate/course_auth/internal/service"
 	serviceMocks "github.com/lookandhate/course_auth/internal/service/mocks"
 	"github.com/lookandhate/course_auth/internal/service/model"
-	userApi "github.com/lookandhate/course_auth/pkg/auth_v1"
+	userApi "github.com/lookandhate/course_auth/pkg/user_v1"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )

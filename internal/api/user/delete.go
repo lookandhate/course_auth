@@ -3,7 +3,7 @@ package user
 import (
 	"context"
 
-	authAPI "github.com/lookandhate/course_auth/pkg/auth_v1"
+	authAPI "github.com/lookandhate/course_auth/pkg/user_v1"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
