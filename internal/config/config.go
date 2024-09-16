@@ -15,6 +15,7 @@ type AppConfig struct {
 	GPRC  GRPCConfig     `yaml:"gprc"`
 	DB    PostgresConfig `yaml:"db"`
 	Redis RedisConfig    `yaml:"redis"`
+	Kafka KafkaConfig    `yaml:"kafka"`
 }
 
 // MustLoad creates AppConfig and loads it from yaml file.

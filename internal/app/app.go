@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"net"
+	"sync"
 
 	"github.com/lookandhate/course_auth/pkg/auth_v1"
 	"github.com/lookandhate/course_platform_lib/pkg/closer"
@@ -26,13 +27,36 @@ func NewApp(ctx context.Context) (*App, error) {
 	return app, nil
 }
 
-func (a *App) Run() error {
+func (a *App) Run(ctx context.Context) error {
 	defer func() {
 		closer.CloseAll()
 		closer.Wait()
 	}()
 
-	return a.runGRPCServer()
+	wg := &sync.WaitGroup{}
+	wg.Add(2) //nolint:mnd // not really a magic number
+
+	go func() {
+		defer wg.Done()
+
+		err := a.serviceProvider.UserSaverConsumer(ctx).RunConsumer(ctx)
+		if err != nil {
+			log.Printf("error runing UserSaverConsumer: %v\n", err)
+		}
+	}()
+
+	go func() {
+		defer wg.Done()
+
+		err := a.runGRPCServer()
+		if err != nil {
+			log.Fatalf("error runing grpc app: %v\n", err)
+		}
+	}()
+
+	wg.Wait()
+
+	return nil
 }
 
 // initDeps initialize dependencies.
