@@ -94,7 +94,7 @@ func TestGet(t *testing.T) {
 			t.Parallel()
 
 			userServiceMock := tt.userServiceMock(mc)
-			api := user.NewAuthServer(userServiceMock)
+			api := user.NewUserServer(userServiceMock)
 
 			userData, err := api.Get(tt.args.ctx, tt.args.req)
 			require.Equal(t, tt.err, err)

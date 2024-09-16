@@ -7,6 +7,8 @@ import (
 
 	"github.com/IBM/sarama"
 	redigo "github.com/gomodule/redigo/redis"
+	accessServer "github.com/lookandhate/course_auth/internal/api/access"
+	authServer "github.com/lookandhate/course_auth/internal/api/auth"
 	userServer "github.com/lookandhate/course_auth/internal/api/user"
 	"github.com/lookandhate/course_auth/internal/cache"
 	userCache "github.com/lookandhate/course_auth/internal/cache/user"
@@ -16,6 +18,8 @@ import (
 	"github.com/lookandhate/course_auth/internal/repository"
 	userRepo "github.com/lookandhate/course_auth/internal/repository/user"
 	"github.com/lookandhate/course_auth/internal/service"
+	accessService "github.com/lookandhate/course_auth/internal/service/access"
+	authService "github.com/lookandhate/course_auth/internal/service/auth"
 	consumerService "github.com/lookandhate/course_auth/internal/service/consumer"
 	"github.com/lookandhate/course_auth/internal/service/consumer/user_saver"
 	userService "github.com/lookandhate/course_auth/internal/service/user"
@@ -43,6 +47,12 @@ type serviceProvider struct {
 	userServerImpl *userServer.Server
 
 	userSaverConsumer consumerService.ConsumerService
+
+	authServerImpl *authServer.Server
+	authService    service.AuthService
+
+	accessServerImpl *accessServer.Server
+	accessService    service.AccessService
 
 	passwordManager client.PasswordManager
 
@@ -87,9 +97,43 @@ func (s *serviceProvider) UserService(ctx context.Context) service.UserService {
 
 func (s *serviceProvider) UserServerImpl(ctx context.Context) *userServer.Server {
 	if s.userServerImpl == nil {
-		s.userServerImpl = userServer.NewAuthServer(s.UserService(ctx))
+		s.userServerImpl = userServer.NewUserServer(s.UserService(ctx))
 	}
+
 	return s.userServerImpl
+}
+
+func (s *serviceProvider) AuthService(ctx context.Context) service.AuthService {
+	if s.authService == nil {
+		s.authService = authService.NewAuthService()
+	}
+
+	return s.authService
+}
+
+func (s *serviceProvider) AuthServerImpl(ctx context.Context) *authServer.Server {
+	if s.authServerImpl == nil {
+		s.authServerImpl = authServer.NewAuthServer(s.AuthService(ctx))
+	}
+
+	return s.authServerImpl
+}
+
+func (s *serviceProvider) AccessService(ctx context.Context) service.AccessService {
+	if s.authService == nil {
+		s.authService = accessService.NewAccessService()
+	}
+
+	return s.authService
+}
+
+func (s *serviceProvider) AccessServerImpl(ctx context.Context) *accessServer.Server {
+	if s.accessServerImpl == nil {
+		s.accessServerImpl = accessServer.NewAccessServer(s.AccessService(ctx))
+	}
+
+	return s.accessServerImpl
+
 }
 
 func (s *serviceProvider) DBClient(ctx context.Context) db.Client {

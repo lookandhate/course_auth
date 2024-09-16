@@ -88,7 +88,7 @@ func TestCreate(t *testing.T) {
 			t.Parallel()
 
 			userServiceMock := tt.userServiceMock(mc)
-			api := user.NewAuthServer(userServiceMock)
+			api := user.NewUserServer(userServiceMock)
 
 			newID, err := api.Create(tt.args.ctx, tt.args.req)
 			require.Equal(t, tt.err, err)

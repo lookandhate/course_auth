@@ -6,6 +6,8 @@ import (
 	"net"
 	"sync"
 
+	"github.com/lookandhate/course_auth/pkg/access_v1"
+	"github.com/lookandhate/course_auth/pkg/auth_v1"
 	"github.com/lookandhate/course_auth/pkg/user_v1"
 	"github.com/lookandhate/course_platform_lib/pkg/closer"
 	"google.golang.org/grpc"
@@ -38,11 +40,11 @@ func (a *App) Run(ctx context.Context) error {
 
 	go func() {
 		defer wg.Done()
-
-		err := a.serviceProvider.UserSaverConsumer(ctx).RunConsumer(ctx)
-		if err != nil {
-			log.Printf("error runing UserSaverConsumer: %v\n", err)
-		}
+		//
+		//err := a.serviceProvider.UserSaverConsumer(ctx).RunConsumer(ctx)
+		//if err != nil {
+		//	log.Printf("error runing UserSaverConsumer: %v\n", err)
+		//}
 	}()
 
 	go func() {
@@ -83,7 +85,9 @@ func (a *App) initServiceProvider(_ context.Context) error {
 func (a *App) initGRPCServer(ctx context.Context) error {
 	a.grpcServer = grpc.NewServer(grpc.Creds(insecure.NewCredentials()))
 
-	user_v1.RegisterAuthServer(a.grpcServer, a.serviceProvider.UserServerImpl(ctx))
+	user_v1.RegisterUserServer(a.grpcServer, a.serviceProvider.UserServerImpl(ctx))
+	auth_v1.RegisterAuthServer(a.grpcServer, a.serviceProvider.AuthServerImpl(ctx))
+	access_v1.RegisterAccessServer(a.grpcServer, a.serviceProvider.AccessServerImpl(ctx))
 
 	return nil
 }

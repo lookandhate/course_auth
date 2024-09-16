@@ -13,3 +13,6 @@ type UserRepository interface {
 	DeleteUser(ctx context.Context, id int) error
 	CheckUserExists(ctx context.Context, id int) (bool, error)
 }
+
+type AuthRepository interface {
+}

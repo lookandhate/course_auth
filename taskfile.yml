@@ -17,10 +17,30 @@ tasks:
     - GOBIN={{.LOCAL_BIN}} go install github.com/pressly/goose/v3/cmd/goose@latest
     - GOBIN={{.LOCAL_BIN}} go install github.com/gojuno/minimock/v3/cmd/minimock@latest
 
+
   generate:
+    - mkdir -p pkg/user_v1/
+    - mkdir -p pkg/auth_v1/
+    - mkdir -p pkg/access_v1/
+    - task generate_user_api
+    - task generate_auth_api
+    - task generate_access_api
+
+
+  generate_user_api:
     - protoc --proto_path api/user_v1 --go_out=./pkg/user_v1/
       --go_opt=paths=source_relative --go-grpc_out=./pkg/user_v1/
       --go-grpc_opt=paths=source_relative api/user_v1/user.proto
+
+  generate_auth_api:
+    - protoc --proto_path api/auth_v1 --go_out=./pkg/auth_v1/
+      --go_opt=paths=source_relative --go-grpc_out=./pkg/auth_v1/
+      --go-grpc_opt=paths=source_relative api/auth_v1/auth.proto
+
+  generate_access_api:
+    - protoc --proto_path api/access_v1 --go_out=./pkg/access_v1/
+      --go_opt=paths=source_relative --go-grpc_out=./pkg/access_v1/
+      --go-grpc_opt=paths=source_relative api/access_v1/access.proto
 
   migration-status:
     goose -dir {{.LOCAL_MIGRATION_DIR}} postgres {{.LOCAL_MIGRATION_DSN}} status -v
@@ -50,6 +70,7 @@ tasks:
     cmds:
       - go clean -testcache
       - go test ./... -covermode count -coverpkg=github.com/lookandhate/course_auth/internal/service/...,github.com/lookandhate/course_auth/internal/service/ -count 5
+
   test-coverage:
     cmds:
       - go clean -testcache

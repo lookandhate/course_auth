@@ -59,7 +59,7 @@ func TestDelete(t *testing.T) {
 			t.Parallel()
 
 			userServiceMock := tt.userServiceMock(mc)
-			api := user.NewAuthServer(userServiceMock)
+			api := user.NewUserServer(userServiceMock)
 
 			response, err := api.Delete(tt.args.ctx, tt.args.req)
 			require.Equal(t, tt.err, err)
